@@ -11,7 +11,21 @@ class MarkovChain():
         vertex1 = self.graph.vertices[state1]
         vertex2 = self.graph.vertices[state2]
         vertex1.connectTo(vertex2, weight)
+        if not self.checkNeighborhoodSum():
+            pass
+        
 
+    def checkNeighborhoodSum(self):
+        graph = self.graph.vertices
+        for vertex in graph:
+            total = 0
+            neighbors = graph[vertex].neighbors
+            for neighbor in neighbors:
+                total += neighbors[neighbor]
+            if total > 1:
+                return False
+        return True
+            
     def __str__(self):
         return self.graph.__str__()
         
@@ -60,4 +74,6 @@ if __name__=='__main__':
     mc.connect("A", "B", 0.7)
     mc.connect("A", "C", 0.34)
     mc.connect("C", "D", 0.289)
+    mc.connect("A", "A", 0.3)
     print mc
+    mc.checkNeighborhoodSum()
