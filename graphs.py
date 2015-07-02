@@ -1,6 +1,9 @@
+import random
+
 class MarkovChain():
     def __init__(self):
         self.graph = Graph()
+        self.curr = None
 
     def addState(self, state):
         self.graph.addVertex(Vertex(state))
@@ -11,11 +14,19 @@ class MarkovChain():
         vertex1 = self.graph.vertices[state1]
         vertex2 = self.graph.vertices[state2]
         vertex1.connectTo(vertex2, weight)
-        if not self.checkNeighborhoodSum():
-            pass
-        
+        if not self.checkNeighborhoodSums():
+            vertex1.disconnectFrom(vertex2)
+            raise ValueError("Sum of neighborhood edges must be between 0 and 1.")
 
-    def checkNeighborhoodSum(self):
+    def getNeighborhoodSum(self, vertex):
+        total = 0
+        graph = self.graph.vertices
+        neighbors = graph[vertex].neighbors
+        for neighbor in neighbors:
+            total += neighbors[neighbor]
+        return total
+
+    def checkNeighborhoodSums(self):
         graph = self.graph.vertices
         for vertex in graph:
             total = 0
@@ -25,6 +36,20 @@ class MarkovChain():
             if total > 1:
                 return False
         return True
+
+    def start(self, start = None):
+        choices = self.graph.vertices
+        if start is None:
+            self.curr = random.choice(list(choices.keys()))
+        else:
+            self.curr = start
+        print "Starting at: " + self.curr
+
+    def getNextState(self):
+        choices = self.graph.vertices
+        nextChoices = choices[self.curr]
+        for choice in nextChoices.neighbors:
+            print self.getNeighborhoodSum(choice.name)
             
     def __str__(self):
         return self.graph.__str__()
@@ -38,6 +63,9 @@ class Vertex():
     def connectTo(self, vertex, weight):
         self.neighbors[vertex] = weight
         vertex.neighbors[self] = weight
+
+    def disconnectFrom(self, vertex):
+        self.neighbors.pop(vertex, None)
 
     def __str__(self):
         info = ""
@@ -66,14 +94,32 @@ class Graph():
         return info
 
 if __name__=='__main__':
+    g = Graph()
+    v1 = Vertex("A")
+    v2 = Vertex("B")
+    v3 = Vertex("C")
+    v4 = Vertex("D")
+    v1.connectTo(v2, 3)
+    print v1
+    v1.disconnectFrom(v2)
+    print v1
+
     mc = MarkovChain()
     mc.addState("A")
     mc.addState("B")
     mc.addState("C")
     mc.addState("D")
-    mc.connect("A", "B", 0.7)
-    mc.connect("A", "C", 0.34)
-    mc.connect("C", "D", 0.289)
-    mc.connect("A", "A", 0.3)
+    mc.connect("A", "B", 0.34)
     print mc
-    mc.checkNeighborhoodSum()
+    mc.connect("A", "C", 0.65)
+    print mc
+    mc.connect("B", "D", 0.22394)
+    print mc
+    try:
+        mc.connect("A", "D", 0.04)
+    except ValueError:
+        print "Perfect"
+    print mc
+
+    mc.start()
+    mc.getNextState()
