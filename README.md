@@ -1,2 +1,2 @@
 # AudioGen
-Audio Tools
+Audio tools for procedural music generation.
