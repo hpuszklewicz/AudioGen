@@ -1,16 +1,23 @@
 import random
 
-def pmf(p, rand = None, sortedp = None, prev = 0):
+def pmf(p, rand = None, prev = 0):
     if rand is None:
         rand = random.random()
-    sortedp = sorted(p, key = lambda x: x[1], reverse = True)
-    if sortedp[0][1] >= (rand - prev): 
-        return sortedp[0][0]
+    if p[0][1] >= (rand - prev): 
+        return p[0][0]
     else:
-        return pmf(sortedp[1:],
-                             rand = rand - prev,
-                             sortedp = sortedp,
-                             prev = sortedp[0][1])
+        return pmf(p[1:],
+                   rand = rand - prev,
+                   prev = p[0][1])
+
+def random_distr(l):
+    r = random.uniform(0, 1)
+    s = 0
+    for item, prob in l:
+        s += prob
+        if s >= r:
+            return item
+    return l[-1]  # Might occur because of floating point inaccuracies
     
 class Vertex():
     def __init__(self, name, directed = False):
@@ -147,10 +154,16 @@ if __name__ == "__main__":
     print "\n\nPDF testing"
     
     from collections import Counter
-    p = [("A", 0.25), ("B", 0.70), ("C", 0.05)]
+    p = [("B", 0.70), ("A", 0.25), ("C", 0.05)]
 
     results = []
-    for x in xrange(1000):
+    import time
+    start = time.time()
+    for x in xrange(1000000):
+        if x == 100000:
+            print "100000"
         results.append(pmf(p))
+    end = time.time()
+    print "Time elapsed: " + str(end-start)
 
     print Counter(results)
