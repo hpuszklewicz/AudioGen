@@ -1,5 +1,17 @@
 import random
 
+def pmf(p, rand = None, sortedp = None, prev = 0):
+    if rand is None:
+        rand = random.random()
+    sortedp = sorted(p, key = lambda x: x[1], reverse = True)
+    if sortedp[0][1] >= (rand - prev): 
+        return sortedp[0][0]
+    else:
+        return pmf(sortedp[1:],
+                             rand = rand - prev,
+                             sortedp = sortedp,
+                             prev = sortedp[0][1])
+    
 class Vertex():
     def __init__(self, name, directed = False):
         self.name = name
@@ -88,6 +100,18 @@ class MarkovChain(DirectedGraph):
                     return False
         return True
 
+    def start(self, startState = None):
+        if startState is None:
+            self.curr = random.choice(list(self.vertices.keys()))
+        else:
+            self.curr = startState
+
+    def nextState(self):
+        print self.curr
+        neighbors = self.vertices[self.curr].neighbors
+        for neighbor in neighbors:
+            print neighbors[neighbor]
+
 if __name__ == "__main__":
     
     g = Graph()
@@ -116,3 +140,17 @@ if __name__ == "__main__":
     mc.connect("A", "C", 0.3)
     mc.connect("B", "C", 0.2)
     print mc
+
+    mc.start()
+    mc.nextState()
+
+    print "\n\nPDF testing"
+    
+    from collections import Counter
+    p = [("A", 0.25), ("B", 0.70), ("C", 0.05)]
+
+    results = []
+    for x in xrange(1000):
+        results.append(pmf(p))
+
+    print Counter(results)
