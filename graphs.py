@@ -1,14 +1,17 @@
 import random
+import string
+import time
+from collections import Counter
+from collections import deque
 
-def pmf(p, rand = None, prev = 0):
-    if rand is None:
-        rand = random.random()
-    if p[0][1] >= (rand - prev): 
+def pmf(p, rand, prev = 0):
+    firstProb = p[0][1]
+    if firstProb >= (rand - prev): 
         return p[0][0]
     else:
         return pmf(p[1:],
                    rand = rand - prev,
-                   prev = p[0][1])
+                   prev = firstProb)
 
 def random_distr(l):
     r = random.uniform(0, 1)
@@ -97,17 +100,22 @@ class MarkovChain(DirectedGraph):
         if not self.checkNeighborhoodSums():
             raise ValueError("Sum of neighborhood edges must be between 0 and 1, inclusive")
                 
-    def checkNeighborhoodSums(self):
+    def checkNeighborhoodSums(self, start = False):
         for vertex in self.vertices:
             total = 0
             neighbors = self.vertices[vertex].neighbors
             for neighbor in neighbors:
                 total += neighbors[neighbor]
+                if start:
+                    if total != 1:
+                        return False
                 if total > 1:
                     return False
         return True
 
     def start(self, startState = None):
+        if not self.checkNeighborhoodSums(start = True):
+            raise ValueError("Neighborhoods must have a sum of 1 before starting.")
         if startState is None:
             self.curr = random.choice(list(self.vertices.keys()))
         else:
@@ -152,18 +160,29 @@ if __name__ == "__main__":
     mc.nextState()
 
     print "\n\nPDF testing"
-    
-    from collections import Counter
-    p = [("B", 0.70), ("A", 0.25), ("C", 0.05)]
 
-    results = []
-    import time
+    p = [("A", 0.5),
+         ("B", 0.15), 
+         ("C", 0.1),
+        # ("D", 0.05),
+        # ("E", 0.025),
+        # ("F", 0.025),
+        # ("G", 0.025),
+        # ("H", 0.0125),
+        # ("I", 0.0125),
+        # ("J", 0.0125),
+        # ("K", 0.00625),
+         ("L", 0.1),
+         ("M", 0.1),
+         ("Z", 0.05)]
+    
+
+    results1 = []
     start = time.time()
-    for x in xrange(1000000):
-        if x == 100000:
-            print "100000"
-        results.append(pmf(p))
+    for x in xrange(100000):
+        results1.append(pmf(p, random.random()))
     end = time.time()
     print "Time elapsed: " + str(end-start)
+    print Counter(results1)
+    print "\n"
 
-    print Counter(results)
