@@ -29,18 +29,18 @@ def getIntervals(scaleName):
 
 def getScale(tonic, intervals):
     notes = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
-    for i in xrange(0, len(notes)/2 - 1):
+    for i in range(0, int(len(notes)/2 - 1)):
         if notes[i].lower() == tonic.lower():
             rootIndex = i
             break
     scaleOutput = [notes[rootIndex]]
 
-    for i in xrange(0, len(intervals)):
+    for i in range(0, len(intervals)):
         rootIndex += intervals[i]
         scaleOutput.append(notes[rootIndex])
     return scaleOutput
 
 if __name__ == "__main__":
     intervals = getIntervals("harmonic minor")
-    print intervals
-    print getScale("A", intervals)
+    print(intervals)
+    print(getScale("A", intervals))

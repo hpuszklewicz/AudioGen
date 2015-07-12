@@ -16,7 +16,7 @@ class ProcGen():
             pickedTime = random.choice([0.5, 0.25, 0.125, 0.0625])
             currTime.append(pickedTime)
             result.append((pickedNote, pickedTime))
-        print sum(currTime)
+        print(sum(currTime))
         return result
 
     def generateSound(self):
@@ -25,6 +25,6 @@ class ProcGen():
 
 if __name__=='__main__':
     test1 = ProcGen(30, ["A", "B", "C", "D", "E", "F", "G"], 40, "N/A", "N/A")
-    print test1.noteStream
+    print(test1.noteStream)
 
     

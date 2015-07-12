@@ -24,7 +24,7 @@ def bjorklund(steps, pulses):
         elif level == -2:
             rhythm.append("1")
         else:
-            for i in xrange(0, count[level]):
+            for i in range(0, int(count[level])):
                 build(level - 1)
             if remainder[level] != 0:
                 build(level - 2)
@@ -35,13 +35,13 @@ def bjorklund(steps, pulses):
 
 def toString(list):
     rhythmString = ""
-    for i in xrange(0, len(list)):
+    for i in range(0, len(list)):
         rhythmString += list[i]
     return rhythmString
 
 
 
 if __name__ == '__main__':
-    print bjorklund(16, 7)
-    print toString(bjorklund(16, 7))
+    print(bjorklund(16, 7))
+    print(toString(bjorklund(16, 7)))
 

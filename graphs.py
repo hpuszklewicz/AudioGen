@@ -122,10 +122,10 @@ class MarkovChain(DirectedGraph):
             self.curr = startState
 
     def nextState(self):
-        print self.curr
+        print(self.curr)
         neighbors = self.vertices[self.curr].neighbors
         for neighbor in neighbors:
-            print neighbors[neighbor]
+            print(neighbors[neighbor])
 
 if __name__ == "__main__":
     
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     g.connect("A", "B", 0.23)
     g.connect("A", "C", 0.3)
     g.connect("B", "C", 0.2)
-    print g
+    print(g)
 
     dg = DirectedGraph()
     dg.addVertex("A")
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     dg.connect("A", "B", 0.23)
     dg.connect("A", "C", 0.3)
     dg.connect("B", "C", 0.2)
-    print dg
+    print(dg)
 
     mc = MarkovChain()
     mc.addState("A")
@@ -154,12 +154,12 @@ if __name__ == "__main__":
     mc.connect("A", "B", 0.23)
     mc.connect("A", "C", 0.3)
     mc.connect("B", "C", 0.2)
-    print mc
+    print(mc)
 
     mc.start()
     mc.nextState()
 
-    print "\n\nPDF testing"
+    print("\n\nPDF testing")
 
     p = [("A", 0.5),
          ("B", 0.15), 
@@ -179,10 +179,10 @@ if __name__ == "__main__":
 
     results1 = []
     start = time.time()
-    for x in xrange(100000):
+    for x in range(100000):
         results1.append(pmf(p, random.random()))
     end = time.time()
-    print "Time elapsed: " + str(end-start)
-    print Counter(results1)
-    print "\n"
+    print("Time elapsed: " + str(end-start))
+    print(Counter(results1))
+    print("\n")
 
