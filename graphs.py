@@ -2,7 +2,7 @@ import random
 import string
 import time
 from collections import Counter
-from collections import deque
+from collections import defaultdict
 
 def pmf(p, rand, prev = 0):
     firstProb = p[0][1]
@@ -12,15 +12,6 @@ def pmf(p, rand, prev = 0):
         return pmf(p[1:],
                    rand = rand - prev,
                    prev = firstProb)
-
-def random_distr(l):
-    r = random.uniform(0, 1)
-    s = 0
-    for item, prob in l:
-        s += prob
-        if s >= r:
-            return item
-    return l[-1]  # Might occur because of floating point inaccuracies
     
 class Vertex():
     def __init__(self, name, directed = False):
@@ -106,11 +97,11 @@ class MarkovChain(DirectedGraph):
             neighbors = self.vertices[vertex].neighbors
             for neighbor in neighbors:
                 total += neighbors[neighbor]
-                if start:
-                    if total != 1:
-                        return False
-                if total > 1:
+            if start:
+                if total != 1:
                     return False
+            if total > 1:
+                return False
         return True
 
     def start(self, startState = None):
@@ -122,10 +113,11 @@ class MarkovChain(DirectedGraph):
             self.curr = startState
 
     def nextState(self):
-        print(self.curr)
+        probDistribution = []
         neighbors = self.vertices[self.curr].neighbors
         for neighbor in neighbors:
-            print(neighbors[neighbor])
+            probDistribution.append((neighbor.name, neighbors[neighbor]))
+        return pmf(probDistribution, random.random())
 
 if __name__ == "__main__":
     
@@ -151,38 +143,24 @@ if __name__ == "__main__":
     mc.addState("A")
     mc.addState("B")
     mc.addState("C")
-    mc.connect("A", "B", 0.23)
+    mc.connect("A", "B", 0.5)
+    mc.connect("A", "A", 0.2)
     mc.connect("A", "C", 0.3)
     mc.connect("B", "C", 0.2)
+    mc.connect("B", "A", 0.1)
+    mc.connect("B", "B", 0.7)
+    mc.connect("C", "A", 0.35)
+    mc.connect("C", "B", 0.15)
+    mc.connect("C", "C", 0.5)
     print(mc)
 
     mc.start()
-    mc.nextState()
-
-    print("\n\nPDF testing")
-
-    p = [("A", 0.5),
-         ("B", 0.15), 
-         ("C", 0.1),
-        # ("D", 0.05),
-        # ("E", 0.025),
-        # ("F", 0.025),
-        # ("G", 0.025),
-        # ("H", 0.0125),
-        # ("I", 0.0125),
-        # ("J", 0.0125),
-        # ("K", 0.00625),
-         ("L", 0.1),
-         ("M", 0.1),
-         ("Z", 0.05)]
+    results = []
     
-
-    results1 = []
-    start = time.time()
-    for x in range(100000):
-        results1.append(pmf(p, random.random()))
-    end = time.time()
-    print("Time elapsed: " + str(end-start))
-    print(Counter(results1))
-    print("\n")
-
+    s = time.time()
+    for x in range(1000000):
+        results.append(mc.nextState())
+    e = time.time()
+    print(e-s)
+    
+    print Counter(results)
