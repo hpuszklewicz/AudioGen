@@ -117,7 +117,9 @@ class MarkovChain(DirectedGraph):
         neighbors = self.vertices[self.curr].neighbors
         for neighbor in neighbors:
             probDistribution.append((neighbor.name, neighbors[neighbor]))
-        return pmf(probDistribution, random.random())
+        nextState = pmf(probDistribution, random.random())
+        self.curr = nextState
+        return nextState
 
 if __name__ == "__main__":
     
@@ -154,7 +156,7 @@ if __name__ == "__main__":
     mc.connect("C", "C", 0.5)
     print(mc)
 
-    mc.start()
+    mc.start("A")
     results = []
     
     s = time.time()
