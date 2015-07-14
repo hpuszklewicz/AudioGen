@@ -79,6 +79,7 @@ class DirectedGraph(Graph):
 class MarkovChain(DirectedGraph):
     def __init__(self):
         DirectedGraph.__init__(self)
+        self.probs = {}
 
     def addState(self, name):
         self.vertices[name] = Vertex(name)
@@ -106,17 +107,24 @@ class MarkovChain(DirectedGraph):
 
     def start(self, startState = None):
         if not self.checkNeighborhoodSums(start = True):
-            raise ValueError("Neighborhoods must have a sum of 1 before starting.")
+            raise ValueError("The probability of a state switching must be 1")
         if startState is None:
             self.curr = random.choice(list(self.vertices.keys()))
         else:
             self.curr = startState
+        
+        def getProbDist(state):
+            probDistribution = []
+            neighbors = self.vertices[state].neighbors
+            for neighbor in neighbors:
+                probDistribution.append((neighbor.name, neighbors[neighbor]))
+            return probDistribution
+
+        for vertex in self.vertices:
+            self.probs[vertex] = getProbDist(vertex)
 
     def nextState(self):
-        probDistribution = []
-        neighbors = self.vertices[self.curr].neighbors
-        for neighbor in neighbors:
-            probDistribution.append((neighbor.name, neighbors[neighbor]))
+        probDistribution = self.probs[self.curr]
         nextState = pmf(probDistribution, random.random())
         self.curr = nextState
         return nextState
@@ -130,6 +138,7 @@ if __name__ == "__main__":
     g.connect("A", "B", 0.23)
     g.connect("A", "C", 0.3)
     g.connect("B", "C", 0.2)
+    print(("Undirected graph: "))
     print(g)
 
     dg = DirectedGraph()
@@ -139,26 +148,52 @@ if __name__ == "__main__":
     dg.connect("A", "B", 0.23)
     dg.connect("A", "C", 0.3)
     dg.connect("B", "C", 0.2)
+    print("Directed graph: ")
     print(dg)
 
     mc = MarkovChain()
     mc.addState("A")
     mc.addState("B")
     mc.addState("C")
-    mc.connect("A", "B", 0.5)
-    mc.connect("A", "A", 0.2)
-    mc.connect("A", "C", 0.3)
-    mc.connect("B", "C", 0.2)
-    mc.connect("B", "A", 0.1)
-    mc.connect("B", "B", 0.7)
-    mc.connect("C", "A", 0.35)
-    mc.connect("C", "B", 0.15)
-    mc.connect("C", "C", 0.5)
-    print(mc)
+    mc.addState("D")
+    mc.addState("E")
+    mc.addState("F")
 
-    mc.start("A")
-    results = []
+    mc.connect("A", "A", 0.1)
+    mc.connect("A", "B", 0.15)
+    mc.connect("A", "C", 0.2)
+    mc.connect("A", "D", 0.05)
+    mc.connect("A", "E", 0.25)
+    mc.connect("A", "F", 0.25)
+
+    mc.connect("B", "F", 0.025)
+    mc.connect("B", "E", 0.025)
+    mc.connect("B", "D", 0.05)
+    mc.connect("B", "C", 0.1)
+    mc.connect("B", "B", 0.1)
+    mc.connect("B", "A", 0.7)
+
+    mc.connect("C", "C", 0.3)
+    mc.connect("C", "D", 0.4)
+    mc.connect("C", "E", 0.3)
+
+    mc.connect("D", "E", 0.35)
+    mc.connect("D", "F", 0.15)
+    mc.connect("D", "B", 0.5)
+
+    mc.connect("E", "D", 0.2) 
+    mc.connect("E", "F", 0.2)
+    mc.connect("E", "A", 0.6) 
+
+    mc.connect("F", "B", 0.75)
+    mc.connect("F", "C", 0.25)
+
+    print("Markov Chain: ")
+    print(mc)
     
+    mc.start("C")
+
+    results = []
     s = time.time()
     for x in range(1000000):
         results.append(mc.nextState())
