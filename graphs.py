@@ -1,19 +1,17 @@
 import random
-import string
-import time
-from collections import Counter
-from collections import defaultdict
+
 
 def pmf(p, rand, prev = 0):
     firstProb = p[0][1]
-    if firstProb >= (rand - prev): 
+    if firstProb >= (rand - prev):
         return p[0][0]
     else:
         return pmf(p[1:],
                    rand = rand - prev,
                    prev = firstProb)
-    
-class Vertex():
+
+
+class Vertex:
     def __init__(self, name, directed = False):
         self.name = name
         self.neighbors = {}
@@ -29,13 +27,14 @@ class Vertex():
         info = ""
         if len(self.neighbors) == 0:
             return self.name + " is isolated."
-            info += self.name + " is connected to: "
-            for neighbor in self.neighbors:
+        info += self.name + " is connected to: "
+        for neighbor in self.neighbors:
                 info += "(" + neighbor.name + ", " 
                 info += str(self.neighbors[neighbor]) + ") "
         return info
 
-class Graph():
+
+class Graph:
     def __init__(self):
         self.vertices = {}
         self.directed = False
@@ -64,6 +63,7 @@ class Graph():
             info += "\n"
         return info
 
+
 class DirectedGraph(Graph):
     def __init__(self):
         Graph.__init__(self)
@@ -76,10 +76,12 @@ class DirectedGraph(Graph):
         vertex1, vertex2 = self.vertices[name1], self.vertices[name2]
         vertex1.disconnectFrom(vertex2)
 
+
 class MarkovChain(DirectedGraph):
     def __init__(self):
         DirectedGraph.__init__(self)
         self.probs = {}
+        self.curr = None
 
     def addState(self, name):
         self.vertices[name] = Vertex(name)
@@ -89,10 +91,10 @@ class MarkovChain(DirectedGraph):
             raise ValueError("Weights in the chain must be between 0 and 1, inclusive")
         vertex1, vertex2 = self.vertices[name1], self.vertices[name2]
         vertex1.connectTo(vertex2, weight)
-        if not self.checkNeighborhoodSums():
+        if not self._checkNeighborhoodSums():
             raise ValueError("Sum of neighborhood edges must be between 0 and 1, inclusive")
                 
-    def checkNeighborhoodSums(self, start = False):
+    def _checkNeighborhoodSums(self, start = False):
         for vertex in self.vertices:
             total = 0
             neighbors = self.vertices[vertex].neighbors
@@ -106,7 +108,7 @@ class MarkovChain(DirectedGraph):
         return True
 
     def start(self, startState = None):
-        if not self.checkNeighborhoodSums(start = True):
+        if not self._checkNeighborhoodSums(start = True):
             raise ValueError("The probability of a state switching must be 1")
         if startState is None:
             self.curr = random.choice(list(self.vertices.keys()))
@@ -129,6 +131,16 @@ class MarkovChain(DirectedGraph):
         self.curr = nextState
         return nextState
 
+    def getStates(self, n, start = None):
+        if start is None:
+            self.start()
+        else:
+            self.start(start)
+        states = []
+        for x in range(n):
+            states.append(self.nextState())
+        return states
+
 if __name__ == "__main__":
     
     g = Graph()
@@ -138,7 +150,7 @@ if __name__ == "__main__":
     g.connect("A", "B", 0.23)
     g.connect("A", "C", 0.3)
     g.connect("B", "C", 0.2)
-    print(("Undirected graph: "))
+    print("Undirected graph: ")
     print(g)
 
     dg = DirectedGraph()
@@ -190,14 +202,9 @@ if __name__ == "__main__":
 
     print("Markov Chain: ")
     print(mc)
-    
-    mc.start("C")
 
-    results = []
-    s = time.time()
-    for x in range(1000000):
-        results.append(mc.nextState())
-    e = time.time()
-    print(e-s)
+    print("Generating 1000 states from chain: ")
+    states = mc.getStates(1000)
+    print(states)
     
-    print Counter(results)
+    
