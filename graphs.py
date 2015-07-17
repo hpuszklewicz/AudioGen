@@ -1,5 +1,5 @@
 import random
-
+from collections import Counter
 
 def pmf(p, rand, prev = 0):
     firstProb = p[0][1]
@@ -78,10 +78,20 @@ class DirectedGraph(Graph):
 
 
 class MarkovChain(DirectedGraph):
-    def __init__(self):
+    def __init__(self, startDict = None):
         DirectedGraph.__init__(self)
         self.probs = {}
         self.curr = None
+        if startDict is not None:
+            if not isinstance(startDict, dict):
+                raise TypeError("Starting object must be a dictionary")
+            for vertex, neighbor in startDict.iteritems():
+                if vertex not in self.vertices:
+                    self.addState(vertex)
+                for neighborVertex, weight in neighbor.iteritems():
+                    if neighborVertex not in self.vertices:
+                        self.addState(neighborVertex)
+                    self.connect(vertex, neighborVertex, weight)
 
     def addState(self, name):
         self.vertices[name] = Vertex(name)
@@ -204,7 +214,16 @@ if __name__ == "__main__":
     print(mc)
 
     print("Generating 1000 states from chain: ")
-    states = mc.getStates(1000)
-    print(states)
-    
-    
+    states = mc.getStates(10000)
+
+    dictmc = {"A": {"B": 0.15, "C":0.2, "D":0.05, "E":0.25, "F":0.25, "A":0.1},
+              "C": {"E": 0.3, "C": 0.3, "D": 0.4},
+              "B": {"B": 0.1, "C": 0.1, "D": 0.05, "E": 0.025, "F": 0.025, "A": 0.7},
+              "E": {"F": 0.2, "D": 0.2, "A": 0.6},
+              "D": {"E": 0.35, "B": 0.5, "F": 0.15},
+              "F": {"B": 0.75, "C": 0.25}
+              }
+
+    dictmc = MarkovChain(dictmc)
+    print(Counter(mc.getStates(100000)))
+    print(Counter(dictmc.getStates(100000)))
