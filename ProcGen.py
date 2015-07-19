@@ -1,3 +1,4 @@
+import scale, music21 as m21
 class ProcGen():
     def __init__(self, length, scale, tempo, chordprog, voices):
         self.length = length
@@ -11,9 +12,9 @@ class ProcGen():
         import random
         currTime = []
         result = []
-        while sum(currTime) < ((self.tempo)/60.0)*self.length:
+        while sum(currTime)/4 < ((self.tempo)/60.0)*self.length:
             pickedNote = random.choice(self.scale)
-            pickedTime = random.choice([0.5, 0.25, 0.125, 0.0625])
+            pickedTime = random.choice([2, 1, .5, .25])
             currTime.append(pickedTime)
             result.append((pickedNote, pickedTime))
         print(sum(currTime))
@@ -21,10 +22,21 @@ class ProcGen():
 
     def generateSound(self):
         pass
-        
 
+    def playBack(self):
+        playBackStream = m21.stream.Stream()
+        noteStream = self.noteStream
+        for i in range(len(noteStream)):
+            newNote = m21.note.Note(noteStream[i][0]+ "4")
+            newNote.duration.type = m21.duration.convertQuarterLengthToType(noteStream[i][1])
+            playBackStream.append(newNote)
+        return playBackStream
+    
 if __name__=='__main__':
-    test1 = ProcGen(30, ["A", "B", "C", "D", "E", "F", "G"], 40, "N/A", "N/A")
+    scale = scale.getScale("A", "harmonic minor") 
+    test1 = ProcGen(30, scale, 40, "N/A", "N/A")
     print(test1.noteStream)
-
+    print(test1.noteStream[1][0])
+    newStream = test1.playBack()
+    newStream.show()
     
