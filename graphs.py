@@ -2,12 +2,12 @@ import random
 from collections import Counter
 
 def pmf(p, rand, prev = 0):
-    firstProb = p[0][1]
-    if firstProb >= (rand - prev):
+    firstProb = p[0][1] + prev
+    if rand <= firstProb:
         return p[0][0]
     else:
         return pmf(p[1:],
-                   rand = rand - prev,
+                   rand = rand,
                    prev = firstProb)
 
 
@@ -112,14 +112,18 @@ class MarkovChain(DirectedGraph):
                 total += neighbors[neighbor]
             if start:
                 if total != 1:
-                    return False
+                    return (False, vertex)
+                return (True, vertex)
             if total > 1:
                 return False
         return True
 
     def start(self, startState = None):
-        if not self._checkNeighborhoodSums(start = True):
-            raise ValueError("The probability of a state switching must be 1")
+        checksums = self._checkNeighborhoodSums(start = True)
+        if not checksums[0]:
+            errstr = "The probability of a state switching must be 1."
+            errstr += "The vertex " + checksums[1] + " failed to reach a sum of 1."
+            raise ValueError(errstr)
         if startState is None:
             self.curr = random.choice(list(self.vertices.keys()))
         else:
@@ -213,9 +217,6 @@ if __name__ == "__main__":
     print("Markov Chain: ")
     print(mc)
 
-    print("Generating 1000 states from chain: ")
-    states = mc.getStates(10000)
-
     dictmc = {"A": {"B": 0.15, "C":0.2, "D":0.05, "E":0.25, "F":0.25, "A":0.1},
               "C": {"E": 0.3, "C": 0.3, "D": 0.4},
               "B": {"B": 0.1, "C": 0.1, "D": 0.05, "E": 0.025, "F": 0.025, "A": 0.7},
@@ -225,5 +226,8 @@ if __name__ == "__main__":
               }
 
     dictmc = MarkovChain(dictmc)
+
+    print(dictmc)
+
     print(Counter(mc.getStates(100000)))
     print(Counter(dictmc.getStates(100000)))
